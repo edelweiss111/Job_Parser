@@ -10,6 +10,7 @@ VACANCY_FILE = 'vacancies.json'
 class UrlError(Exception):
     pass
 
+
 class JobAPI(ABC):
     @abstractmethod
     def __init__(self):
@@ -99,7 +100,6 @@ class JSONSaver(Saver):
                     data_list.remove(item)
         with open(VACANCY_FILE, 'w') as json_file:
             json.dump(data_list, json_file, ensure_ascii=False)
-
 
 
 hh = HeadHunterAPI()
