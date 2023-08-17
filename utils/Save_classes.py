@@ -6,6 +6,7 @@ VACANCY_FILE = 'vacancies.json'
 
 
 class Saver(ABC):
+    """Абстрактный класс для сохранения данных в файл"""
     @abstractmethod
     def add_vacancy(self, vacancy):
         pass
@@ -20,10 +21,11 @@ class Saver(ABC):
 
 
 class JSONSaver(Saver):
+    """Класс для работы с данными в JSON файле"""
     def add_vacancy(self, vacancy):
         """Метод добавляющий вакансию в JSON файл"""
         data = {'name': vacancy.name, 'url': vacancy.url, 'salary': vacancy.salary,
-                'description': vacancy.description}
+                'requirement': vacancy.requirement}
         with open(VACANCY_FILE, 'a') as file:
             if os.stat(VACANCY_FILE).st_size == 0:
                 json.dump([data], file, ensure_ascii=False)
@@ -40,7 +42,7 @@ class JSONSaver(Saver):
             data_list = json.load(json_file)
             for item in data_list:
                 if item['salary']:
-                    if item['salary']['to'] >= int(salary) >= item['salary']['from']:
+                    if item['salary']['to'] >= int(salary):
                         return item
 
     def delete_vacancy(self, vacancy):
