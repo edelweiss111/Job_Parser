@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from pprint import pprint
-
+import os
 import requests
+
+API_KEY = os.getenv('SUPERJOB_API')
 
 
 class UrlError(Exception):
@@ -10,42 +11,55 @@ class UrlError(Exception):
 
 
 class JobAPI(ABC):
-    """Абстракный класс для работы с API платформ по поиску работы"""
-
+    """Абстрактный класс для работы с API платформ по поиску работы"""
     @abstractmethod
     def __init__(self):
         pass
 
     @abstractmethod
-    def get_vacancies(self, name):
+    def get_vacancies(self):
         pass
 
 
 class HeadHunterAPI(JobAPI):
     """Класс для работы с API платформы HeadHunter"""
 
-    def __init__(self):
+    def __init__(self, keyword):
         self.url = 'https://api.hh.ru/vacancies'
-
-    def get_vacancies(self, name):
-        """Метод, который возвращает вакансии по заданному параметру"""
-        response = requests.get(self.url, params={
-            'text': name,
+        self.params = {
+            'text': keyword,
             'area': 113,
             'only_with_salary': True,
-            'per_page': 100
-        })
-        return response.json()
+            'per_page': 100,
+            'search_field': 'name'
+        }
+
+    def get_vacancies(self):
+        """Метод, который возвращает вакансии по заданному параметру"""
+
+        response = requests.get(self.url, params=self.params)
+        return response.json()['items']
 
 
 class SuperJobAPI(JobAPI):
     """Класс для работы с API платформы SuperJob"""
 
-    def __init__(self):
-        pass
+    def __init__(self, keyword, page=0):
+        self.url = 'https://api.superjob.ru/2.0/vacancies'
+        self.params = {
+            'keyword': keyword,
+            'countries': 1,
+            'count': 20,
+            'page': page
+        }
 
-    def get_vacancies(self, name):
-        pass
+    def get_vacancies(self):
+        """Метод, который возвращает вакансии по заданному параметру"""
+        headers = {
+            'X-Api-App-Id': API_KEY
+        }
+        response = requests.get(self.url, headers=headers, params=self.params)
+        return response.json()['objects']
 
 
 class Vacancy:
@@ -66,32 +80,23 @@ class Vacancy:
     def __str__(self):
         return f'Название вакансии - {self.name}\n' \
                f'Ссылка - {self.url}\n' \
-               f'З/п до {self.salary["to"]} {self.salary["currency"]}\n' \
+               f'З/п до {self.salary}\n' \
                f'Требования - {self.requirement}\n'
 
     def __eq__(self, other):
-        return self.salary['to'] == other.salary['to']
+        return self.salary == other.salary
 
     def __ne__(self, other):
-        return self.salary['to'] != other.salary['to']
+        return self.salary != other.salary
 
     def __lt__(self, other):
-        return self.salary['to'] < other.salary['to']
+        return self.salary < other.salary
 
     def __le__(self, other):
-        return self.salary['to'] <= other.salary['to']
+        return self.salary <= other.salary
 
     def __gt__(self, other):
-        return self.salary['to'] > other.salary['to']
+        return self.salary > other.salary
 
     def __ge__(self, other):
-        return self.salary['to'] >= other.salary['to']
-
-#
-# hh = HeadHunterAPI().get_vacancies('python')
-# vac = Vacancy(hh['items'][0]['name'], hh['items'][0]['alternate_url'], hh['items'][0]['salary'],
-#               hh['items'][0]['snippet']['requirement'])
-# vac1 = Vacancy(hh['items'][2]['name'], hh['items'][2]['alternate_url'], hh['items'][2]['salary'],
-#                hh['items'][2]['snippet']['requirement'])
-# pprint(hh['items'])
-# pprint(vac < vac1)
+        return self.salary >= other.salary
