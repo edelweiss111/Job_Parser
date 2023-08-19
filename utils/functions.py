@@ -8,7 +8,7 @@ def main():
     try:
         while True:
             '''Функция интерфейса пользователя'''
-            # Пользователь выбирает платформу
+            # Пользователь выбирает платформу и делает запрос по вакансиям
             user_input = input('Введите название платформы. Если захотите выйти введите "exit"\n').lower()
             user_vacancy = input('Введите поисковый запрос:\n')
             if user_input == platforms[0].lower():
@@ -76,6 +76,7 @@ def sort_vacancies(vacancies):
 
 
 def get_top_vacancies(vacancies_list, top_number):
+    """Функция для получения топ N вакансий"""
     top_list = []
     for vacancy in vacancies_list:
         top_list.append(vacancy)
@@ -83,6 +84,7 @@ def get_top_vacancies(vacancies_list, top_number):
 
 
 def get_from_headhunter(vacancies):
+    """Функция для инициализации вакансий с платформы HeadHunter"""
     vacancies_list = []
     for item in vacancies:
         if item['salary']['to']:
@@ -94,6 +96,7 @@ def get_from_headhunter(vacancies):
 
 
 def get_from_superjob(vacancies):
+    """Функция для инициализации вакансий с платформы SuperJob"""
     vacancies_list = []
     for item in vacancies:
         if item['payment_to']:
