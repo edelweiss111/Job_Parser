@@ -38,12 +38,14 @@ class JSONSaver(Saver):
 
     def get_vacancies_by_salary(self, salary):
         """Метод, возвращающий вакансию по заданной з/п"""
+        vacancy_list = []
         with open(VACANCY_FILE) as json_file:
             data_list = json.load(json_file)
             for item in data_list:
                 if item['salary']:
                     if item['salary']['to'] >= int(salary):
-                        return item
+                        vacancy_list.append(item)
+                        return vacancy_list
 
     def delete_vacancy(self, vacancy):
         """Метод, удаляющий выбранную вакансию из JSON файла"""
