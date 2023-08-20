@@ -2,11 +2,20 @@ import os
 from abc import ABC, abstractmethod
 import json
 
-VACANCY_FILE = 'vacancies.json'
+
+class JSONError(Exception):
+    """Класс для обработки ошибок с JSON файлом"""
+    def __init__(self, msg):
+        super().__init__(msg)
 
 
 class Saver(ABC):
     """Абстрактный класс для сохранения данных в файл"""
+
+    @abstractmethod
+    def __init__(self):
+        pass
+
     @abstractmethod
     def add_vacancy(self, vacancy):
         pass
@@ -22,37 +31,53 @@ class Saver(ABC):
 
 class JSONSaver(Saver):
     """Класс для работы с данными в JSON файле"""
+
+    def __init__(self, filename: str):
+        self.filename = filename
+
+    def load_file(self):
+        with open(self.filename) as json_file:
+            data_list = json.load(json_file)
+        return data_list
+
+    def write_file(self, data_list: list):
+        with open(self.filename, 'w') as json_file:
+            json.dump(data_list, json_file, ensure_ascii=False)
+
     def add_vacancy(self, vacancy):
         """Метод добавляющий вакансию в JSON файл"""
         data = {'name': vacancy.name, 'url': vacancy.url, 'salary': vacancy.salary,
                 'requirement': vacancy.requirement}
-        with open(VACANCY_FILE, 'a') as file:
-            if os.stat(VACANCY_FILE).st_size == 0:
-                json.dump([data], file, ensure_ascii=False)
-            else:
-                with open(VACANCY_FILE) as json_file:
-                    data_list = json.load(json_file)
-                data_list.append(data)
-                with open(VACANCY_FILE, 'w') as json_file:
-                    json.dump(data_list, json_file, ensure_ascii=False)
+        try:
+            with open(self.filename, 'a') as file:
+                if os.stat(self.filename).st_size == 0:
+                    json.dump([data], file, ensure_ascii=False)
+                else:
+                    data_list = self.load_file()
+                    data_list.append(data)
+                    self.write_file(data_list)
+        except ValueError:
+            raise JSONError('Данные в файле повреждены')
 
-    def get_vacancies_by_salary(self, salary):
+    def get_vacancies_by_salary(self, salary: int):
         """Метод, возвращающий вакансию по заданной з/п"""
-        vacancy_list = []
-        with open(VACANCY_FILE) as json_file:
-            data_list = json.load(json_file)
+        try:
+            vacancy_list = []
+            data_list = self.load_file()
             for item in data_list:
-                if item['salary']:
-                    if item['salary']['to'] >= int(salary):
-                        vacancy_list.append(item)
-                        return vacancy_list
+                if item['salary'] >= salary:
+                    vacancy_list.append(item)
+            return vacancy_list
+        except ValueError:
+            raise JSONError('Данные в файле повреждены')
 
     def delete_vacancy(self, vacancy):
         """Метод, удаляющий выбранную вакансию из JSON файла"""
-        with open(VACANCY_FILE) as json_file:
-            data_list = json.load(json_file)
+        try:
+            data_list = self.load_file()
             for item in data_list:
                 if item['url'] == vacancy.url:
                     data_list.remove(item)
-        with open(VACANCY_FILE, 'w') as json_file:
-            json.dump(data_list, json_file, ensure_ascii=False)
+            self.write_file(data_list)
+        except ValueError:
+            raise JSONError('Данные в файле повреждены')
