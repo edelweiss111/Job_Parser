@@ -56,8 +56,7 @@ def main():
                 for vacancy in top:
                     try:
                         JSONSaver(VACANCY_FILE).add_vacancy(vacancy)
-                    except UnicodeError as e:
-                        print(e)
+                    except UnicodeError:
                         print(f'Произошла ошибка с сохранением вакансии {vacancy.url}')
                     finally:
                         print(vacancy)
