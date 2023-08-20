@@ -1,6 +1,5 @@
 from utils.API_classes import *
 from utils.Save_classes import JSONSaver
-from pprint import pprint
 
 platforms = ["HeadHunter", "SuperJob"]
 VACANCY_FILE = 'vacancies.json'
@@ -14,14 +13,16 @@ def main():
             user_input = input('Введите название платформы. Если захотите выйти введите "exit"\n').lower()
             user_vacancy = input('Введите поисковый запрос:\n')
             if user_input == platforms[0].lower():
-                hh_vacancies = HeadHunterAPI(user_vacancy).get_vacancies()
+                platform = HeadHunterAPI(user_vacancy)
+                hh_vacancies = platform.get_vacancies()
                 if len(hh_vacancies) == 0:
                     print('Нет вакансий по вашему запросу')
                     continue
                 vacancies = get_from_headhunter(hh_vacancies)
                 break
             elif user_input == platforms[1].lower():
-                sj_vacancies = SuperJobAPI(user_vacancy).get_vacancies()
+                platform = SuperJobAPI(user_vacancy)
+                sj_vacancies = platform.get_vacancies()
                 if len(sj_vacancies) == 0:
                     print('Нет вакансий по вашему запросу')
                     continue
