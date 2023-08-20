@@ -72,7 +72,7 @@ class Vacancy:
     def __init__(self, name: str, url: str, salary: int, requirement: str):
         self.name = name
         if not isinstance(self.name, str):
-            raise TypeError("Название вакансии должно быть строкой")
+            raise TypeError("Название вакансии должно быть типа 'str'")
         self.url = url
         if self.url[:8] != 'https://':
             raise UrlError("Ссылка должна начинаться с https://")
@@ -80,6 +80,8 @@ class Vacancy:
         if self.salary is None:
             raise AttributeError('Поле не может быть пустым')
         self.requirement = requirement
+        if self.requirement is None:
+            raise AttributeError('Поле не может быть пустым')
 
     def __str__(self):
         return f'Название вакансии - {self.name}\n' \
