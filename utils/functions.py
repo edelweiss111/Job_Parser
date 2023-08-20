@@ -1,13 +1,15 @@
 from utils.API_classes import *
 from utils.Save_classes import JSONSaver
+from pprint import pprint
 
 platforms = ["HeadHunter", "SuperJob"]
+VACANCY_FILE = 'vacancies.json'
 
 
 def main():
+    """Функция интерфейса пользователя"""
     try:
         while True:
-            '''Функция интерфейса пользователя'''
             # Пользователь выбирает платформу и делает запрос по вакансиям
             user_input = input('Введите название платформы. Если захотите выйти введите "exit"\n').lower()
             user_vacancy = input('Введите поисковый запрос:\n')
@@ -33,12 +35,11 @@ def main():
         while True:
             # Пользователь фильтрует вакансии по требованиям
             filter_words = input("Введите ключевые слова для фильтрации вакансий:\n").lower().split()
-            filtered_vacancies = filter_vacancies(vacancies, filter_words)
-            sorted_vacancies = sort_vacancies(filtered_vacancies)
-            if len(sorted_vacancies) == 0:
-                print('Нет вакансий по данным критериям, введите другие критерии или "exit" для выхода')
-            elif filter_words == 'exit':
+            if filter_words == 'exit':
                 exit()
+            filtered_vacancies = filter_vacancies(vacancies, filter_words)
+            if len(filtered_vacancies) == 0:
+                print('Нет вакансий по данным критериям, введите другие критерии или "exit" для выхода')
             else:
                 break
 
@@ -50,17 +51,22 @@ def main():
                 print('"N" должно быть целым числом')
                 continue
             else:
-                top = get_top_vacancies(sorted_vacancies, top_n)
+                top = get_top_vacancies(filtered_vacancies, top_n)
                 for vacancy in top:
-                    JSONSaver().add_vacancy(vacancy)
-                    print(vacancy)
+                    try:
+                        JSONSaver(VACANCY_FILE).add_vacancy(vacancy)
+                    except UnicodeError as e:
+                        print(e)
+                        print(f'Произошла ошибка с сохранением вакансии {vacancy.url}')
+                    finally:
+                        print(vacancy)
                 break
 
     except Exception as e:
         raise e
 
 
-def filter_vacancies(vacancies, filter_words):
+def filter_vacancies(vacancies: list, filter_words: list):
     """Функция для фильтрации вакансий по критериям"""
     filtered_list = []
     for vacancy in vacancies:
@@ -70,38 +76,31 @@ def filter_vacancies(vacancies, filter_words):
     return filtered_list
 
 
-def sort_vacancies(vacancies):
-    """Функция для сортировки вакансий по зарплате"""
-    return sorted(vacancies)
-
-
-def get_top_vacancies(vacancies_list, top_number):
+def get_top_vacancies(vacancies_list: list, top_number: int):
     """Функция для получения топ N вакансий"""
-    top_list = []
-    for vacancy in vacancies_list:
-        top_list.append(vacancy)
-    return top_list[:top_number]
+    return sorted(vacancies_list)[:top_number]
 
 
-def get_from_headhunter(vacancies):
+def get_from_headhunter(vacancies: list):
     """Функция для инициализации вакансий с платформы HeadHunter"""
     vacancies_list = []
     for item in vacancies:
-        if item['salary']['to']:
-            if item['salary']['currency'] == 'RUR':
-                vacancy = Vacancy(item['name'], item['alternate_url'], item['salary']['to'],
-                                  item['snippet']['requirement'])
-                vacancies_list.append(vacancy)
+        if item['snippet']['requirement']:
+            if item['salary']['to']:
+                if item['salary']['currency'] == 'RUR':
+                    vacancy = Vacancy(item['name'], item['alternate_url'], item['salary']['to'],
+                                      item['snippet']['requirement'])
+                    vacancies_list.append(vacancy)
     return vacancies_list
 
 
-def get_from_superjob(vacancies):
+def get_from_superjob(vacancies: list):
     """Функция для инициализации вакансий с платформы SuperJob"""
     vacancies_list = []
     for item in vacancies:
         if item['payment_to']:
             if item['currency'] == 'rub':
                 vacancy = Vacancy(item['profession'], item['link'], item['payment_to'],
-                                  item['vacancyRichText'])
+                                  item['candidat'])
                 vacancies_list.append(vacancy)
     return vacancies_list
