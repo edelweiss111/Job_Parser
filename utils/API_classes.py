@@ -7,11 +7,13 @@ API_KEY = os.getenv('SUPERJOB_API')
 
 class UrlError(Exception):
     """Класс ошибки в URL адресе"""
-    pass
+    def __init__(self, msg):
+        super.__init__(msg)
 
 
 class JobAPI(ABC):
     """Абстрактный класс для работы с API платформ по поиску работы"""
+
     @abstractmethod
     def __init__(self):
         pass
@@ -24,12 +26,13 @@ class JobAPI(ABC):
 class HeadHunterAPI(JobAPI):
     """Класс для работы с API платформы HeadHunter"""
 
-    def __init__(self, keyword):
+    def __init__(self, keyword: str):
         self.url = 'https://api.hh.ru/vacancies'
         self.params = {
             'text': keyword,
             'area': 113,
             'only_with_salary': True,
+            'page': 0,
             'per_page': 100,
             'search_field': 'name'
         }
@@ -44,13 +47,13 @@ class HeadHunterAPI(JobAPI):
 class SuperJobAPI(JobAPI):
     """Класс для работы с API платформы SuperJob"""
 
-    def __init__(self, keyword, page=0):
+    def __init__(self, keyword: str):
         self.url = 'https://api.superjob.ru/2.0/vacancies'
         self.params = {
             'keyword': keyword,
             'countries': 1,
-            'count': 20,
-            'page': page
+            'count': 100,
+            'page': 0
         }
 
     def get_vacancies(self):
@@ -64,8 +67,9 @@ class SuperJobAPI(JobAPI):
 
 class Vacancy:
     """Класс для создания экземпляров вакансий и работы с ними"""
+    __slots__ = {'name', 'url', 'salary', 'requirement'}
 
-    def __init__(self, name, url, salary, requirement):
+    def __init__(self, name: str, url: str, salary: int, requirement: str):
         self.name = name
         if not isinstance(self.name, str):
             raise TypeError("Название вакансии должно быть строкой")
@@ -80,7 +84,7 @@ class Vacancy:
     def __str__(self):
         return f'Название вакансии - {self.name}\n' \
                f'Ссылка - {self.url}\n' \
-               f'З/п до {self.salary}\n' \
+               f'З/п до {self.salary} RUR\n' \
                f'Требования - {self.requirement}\n'
 
     def __eq__(self, other):
