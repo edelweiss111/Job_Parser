@@ -11,6 +11,8 @@ def main():
         while True:
             # Пользователь выбирает платформу и делает запрос по вакансиям
             user_input = input('Введите название платформы. Если захотите выйти введите "exit"\n').lower()
+            if user_input.lower() == 'exit':
+                exit()
             user_vacancy = input('Введите поисковый запрос:\n')
             if user_input == platforms[0].lower():
                 platform = HeadHunterAPI(user_vacancy)
@@ -28,17 +30,15 @@ def main():
                     continue
                 vacancies = get_from_superjob(sj_vacancies)
                 break
-            elif user_input.lower() == 'exit':
-                exit()
             else:
                 print('Такой платформы нет в базе')
 
         while True:
             # Пользователь фильтрует вакансии по требованиям
-            filter_words = input("Введите ключевые слова для фильтрации вакансий:\n").lower().split()
+            filter_words = input("Введите ключевые слова для фильтрации вакансий:\n").lower()
             if filter_words == 'exit':
                 exit()
-            filtered_vacancies = filter_vacancies(vacancies, filter_words)
+            filtered_vacancies = filter_vacancies(vacancies, filter_words.split())
             if len(filtered_vacancies) == 0:
                 print('Нет вакансий по данным критериям, введите другие критерии или "exit" для выхода')
             else:
