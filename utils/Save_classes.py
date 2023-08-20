@@ -36,12 +36,12 @@ class JSONSaver(Saver):
         self.filename = filename
 
     def load_file(self):
-        with open(self.filename) as json_file:
+        with open(self.filename, encoding='utf-8') as json_file:
             data_list = json.load(json_file)
         return data_list
 
     def write_file(self, data_list: list):
-        with open(self.filename, 'w') as json_file:
+        with open(self.filename, 'w', encoding='utf-8') as json_file:
             json.dump(data_list, json_file, ensure_ascii=False)
 
     def add_vacancy(self, vacancy):
@@ -49,7 +49,7 @@ class JSONSaver(Saver):
         data = {'name': vacancy.name, 'url': vacancy.url, 'salary': vacancy.salary,
                 'requirement': vacancy.requirement}
         try:
-            with open(self.filename, 'a') as file:
+            with open(self.filename, 'a', encoding='utf-8') as file:
                 if os.stat(self.filename).st_size == 0:
                     json.dump([data], file, ensure_ascii=False)
                 else:
