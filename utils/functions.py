@@ -54,12 +54,8 @@ def main():
             else:
                 top = get_top_vacancies(filtered_vacancies, top_n)
                 for vacancy in top:
-                    try:
-                        JSONSaver(VACANCY_FILE).add_vacancy(vacancy)
-                    except UnicodeError:
-                        print(f'Произошла ошибка с сохранением вакансии {vacancy.url}')
-                    finally:
-                        print(vacancy)
+                    JSONSaver(VACANCY_FILE).add_vacancy(vacancy)
+                    print(vacancy)
                 break
 
     except Exception as e:
@@ -98,9 +94,10 @@ def get_from_superjob(vacancies: list):
     """Функция для инициализации вакансий с платформы SuperJob"""
     vacancies_list = []
     for item in vacancies:
-        if item['payment_to']:
-            if item['currency'] == 'rub':
-                vacancy = Vacancy(item['profession'], item['link'], item['payment_to'],
-                                  item['candidat'])
-                vacancies_list.append(vacancy)
+        if item['candidat']:
+            if item['payment_to']:
+                if item['currency'] == 'rub':
+                    vacancy = Vacancy(item['profession'], item['link'], item['payment_to'],
+                                      item['candidat'])
+                    vacancies_list.append(vacancy)
     return vacancies_list
